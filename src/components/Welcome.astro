@@ -1,94 +1,389 @@
 ---
-import Nav from "@/components/Nav";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, BadgeCheck } from "lucide-react";
+
+import pkg from 'lucide-react';
+const {
+  ArrowLeft, Mail, BadgeCheck, Image: ImageIcon,
+  Smile, X, Edit3, Camera, MapPin, GraduationCap, Languages
+} = pkg;
+
+const isDev = import.meta.env.DEV;
 ---
 
-<div class="flex justify-center w-full min-h-screen bg-background text-foreground">
-  <div class="w-full max-w-[600px] border-x border-border flex flex-col">
+<script is:inline>
+  const theme = (() => {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+      return localStorage.getItem('theme');
+    }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  })();
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+</script>
+
+<div class="flex justify-center w-full min-h-screen bg-background text-foreground relative selection:bg-[#1d9bf0]/30">
+  <div class="w-full max-w-[600px] border-x border-border flex flex-col" id="main-container" data-is-dev={isDev}>
     
     <header class="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <nav class="flex items-center h-14 px-4 gap-4">
-        <a href="/" class="p-2 hover:bg-accent rounded-full transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </a>
-        <div class="flex flex-col flex-1">
-          <h1 class="font-bold text-lg leading-tight tracking-tight">Baptiste HUBERT</h1>
-          <span class="text-xs text-muted-foreground font-normal">1,245 Posts</span>
+        <div class="flex flex-col flex-1 ml-2">
+          <div class="flex items-center gap-1">
+            <h1 id="ui-header-name" class="font-bold text-lg leading-tight tracking-tight">Baptiste HUBERT</h1>
+            <BadgeCheck className="w-4 h-4 fill-[#1d9bf0] text-background stroke-[2px] animate-pulse drop-shadow-[0_0_3px_#1d9bf0]" />
+          </div>
+          <span id="ui-portfolio-text" class="text-xs text-muted-foreground font-normal">Portfolio Pro</span>
         </div>
-        <ModeToggle client:load />
       </nav>
     </header>
 
     <main>
-      <div class="w-full aspect-[3/1] bg-muted overflow-hidden">
-        <img 
-          src="https://images.unsplash.com/photo-1557683316-973673baf926" 
-          alt="Bannière" 
-          class="w-full h-full object-cover"
-        />
+      <div class="w-full aspect-[3/1] bg-muted overflow-hidden relative">
+        <img id="ui-banner" src="https://images.unsplash.com/photo-1557683316-973673baf926" alt="Bannière" class="w-full h-full object-cover" />
       </div>
 
-      <div class="px-4">
+      <div class="px-4 border-b border-border pb-4">
         <div class="relative flex justify-between items-end">
           <div class="-mt-16 w-32 h-32 rounded-full border-4 border-background bg-muted overflow-hidden shadow-sm">
-            <img 
-              src="https://avatars.githubusercontent.com/u/180057806?v=4" 
-              alt="Photo de profil" 
-              class="w-full h-full object-cover"
-            />
+            <img id="ui-avatar" src="https://avatars.githubusercontent.com/u/180057806?v=4" alt="Profil" class="w-full h-full object-cover" />
           </div>
           
           <div class="mb-2 flex gap-2">
-            <Button variant="outline" size="icon" className="relative overflow-hidden rounded-full border-border h-9 w-9 group transition-all duration-300 hover:border-[#1d9bf0]/50">
-              <Mail className="w-5 h-5 z-10 transition-all duration-300 group-hover:text-[#1d9bf0] group-hover:drop-shadow-[0_0_8px_rgba(29,155,240,0.8)]" />
-              
-              <div class="absolute inset-0 translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent z-0"></div>
-            </Button>
-
-            <Button className="rounded-full font-bold px-6 h-9">
-              Suivre
-            </Button>
+            {isDev && (
+              <Button id="open-edit-modal" variant="outline" className="rounded-full font-bold px-4 h-9 border-border hover:bg-accent transition-all flex gap-2 items-center">
+                <Edit3 className="w-4 h-4" /> <span id="txt-edit">Éditer</span>
+              </Button>
+            )}
+            <a href="mailto:baptxx@icloud.com">
+              <Button variant="outline" size="icon" className="rounded-full h-9 w-9 border-border hover:bg-[#1d9bf0]/10 hover:text-[#1d9bf0] transition-colors">
+                <Mail className="w-5 h-5" />
+              </Button>
+            </a>
           </div>
         </div>
 
-        <div class="mt-4 pb-4">
+        <div class="mt-4">
           <div class="flex items-center gap-1">
-            <h2 class="text-xl font-extrabold leading-tight">Baptiste HUBERT</h2>
-            <BadgeCheck className="w-5 h-5 fill-[#1d9bf0] text-background stroke-[2.5px] animate-pulse drop-shadow-[0_0_4px_rgba(29,155,240,0.6)]" />
+            <h2 id="ui-name" class="text-xl font-extrabold leading-tight">Baptiste HUBERT</h2>
+            <BadgeCheck className="w-5 h-5 fill-[#1d9bf0] text-background stroke-[2.5px] animate-pulse drop-shadow-[0_0_5px_#1d9bf0]" />
           </div>
           <p class="text-muted-foreground text-[15px]">@baptistehbt</p>
+          <div id="ui-bio" class="mt-3 text-[15px] leading-normal text-foreground/90 whitespace-pre-wrap">Développeur Web & Designer.🚀</div>
           
-          <div class="mt-3 text-[15px] leading-normal">
-            Développeur Web & Designer. Passionné par la création d'interfaces propres et intuitives. 🚀
+          <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[14px] text-muted-foreground">
+            <div class="flex items-center gap-1"><MapPin className="w-4 h-4" /><span id="ui-location">Rennes, France</span></div>
+            <div class="flex items-center gap-1"><GraduationCap className="w-4 h-4" /><span id="ui-school">Epitech</span></div>
+            <a id="ui-github-link" href="#" target="_blank" class="flex items-center gap-1 hover:text-foreground">GitHub</a>
+            <a id="ui-linkedin-link" href="#" target="_blank" class="flex items-center gap-1 hover:text-foreground">LinkedIn</a>
           </div>
         </div>
       </div>
 
-      <nav class="flex w-full border-b border-border">
-        <a href="#" class="flex-1 py-4 text-center hover:bg-accent/50 transition-colors relative group">
-          <span class="font-bold text-sm">Posts</span>
-          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-[#1d9bf0] rounded-full"></div>
+      <nav class="flex w-full border-b border-border sticky top-14 bg-background/80 backdrop-blur-md z-40">
+        <a href="#posts" class="flex-1 py-4 text-center font-bold text-sm relative">
+            <span id="tab-posts">Posts</span>
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-[#1d9bf0] rounded-full shadow-[0_0_8px_#1d9bf0]"></div>
         </a>
-        <a href="#" class="flex-1 py-4 text-center hover:bg-accent/50 transition-colors text-muted-foreground font-bold text-sm">
-          Réponses
-        </a>
-        <a href="#" class="flex-1 py-4 text-center hover:bg-accent/50 transition-colors text-muted-foreground font-bold text-sm">
-          Projets
-        </a>
+        <a href="#experience" class="flex-1 py-4 text-center text-muted-foreground font-bold text-sm hover:bg-accent/50 transition-colors"><span id="tab-exp">Experience</span></a>
+        <a href="#skills" class="flex-1 py-4 text-center text-muted-foreground font-bold text-sm hover:bg-accent/50 transition-colors"><span id="tab-skills">Skills</span></a>
       </nav>
 
-      <div class="min-h-screen px-4 py-8 text-center text-muted-foreground italic">
-        Aucun post pour le moment.
-      </div>
+      {isDev && (
+        <div class="p-4 border-b border-border bg-accent/5">
+          <div class="flex gap-3">
+            <img id="post-box-avatar" src="" class="w-10 h-10 rounded-full flex-shrink-0 object-cover" />
+            <div class="flex-1">
+              <textarea id="post-input" placeholder="Quoi de neuf ?" class="w-full bg-transparent text-lg border-none focus:ring-0 resize-none p-0" rows="2"></textarea>
+              <div id="post-preview-container" class="mt-3 relative hidden rounded-2xl overflow-hidden border aspect-video">
+                <img id="post-preview-img" src="" class="w-full h-full object-cover" />
+                <button id="remove-post-img" class="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full"><X className="w-4 h-4" /></button>
+              </div>
+              <div class="flex justify-between items-center mt-3 pt-2 border-t border-border/50">
+                <div class="flex text-[#1d9bf0] gap-1">
+                  <input type="file" id="post-img-input" accept="image/*" class="hidden" />
+                  <button id="trigger-post-img" class="p-2 hover:bg-[#1d9bf0]/10 rounded-full"><ImageIcon className="w-5 h-5" /></button>
+                </div>
+                <Button id="send-post" className="rounded-full bg-[#1d9bf0] text-white px-5 h-8 text-sm font-bold shadow-md">Poster</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div id="posts-container"></div>
     </main>
+  </div>
+
+  <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+    <div class="relative">
+      <button id="lang-toggle-btn" class="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent h-9 w-9">
+        <Languages className="h-[1.2rem] w-[1.2rem]" />
+      </button>
+	<div id="lang-menu" class="absolute bottom-full right-0 mb-2 w-24 bg-background border border-border rounded-md shadow-lg hidden flex-col overflow-hidden animate-in">
+	<button class="lang-btn px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-accent transition-colors" data-lang="fr" title="Français">
+		<img src="https://flagcdn.com/w40/fr.png" alt="FR" class="w-6 h-auto rounded-sm shadow-xs" />
+	</button>
+	<button class="lang-btn px-3 py-2 text-sm flex items-center gap-2.5 border-t border-border hover:bg-accent transition-colors" data-lang="en" title="English">
+		<img src="https://flagcdn.com/w40/gb.png" alt="EN" class="w-6 h-auto rounded-sm shadow-xs" />
+	</button>
+	<button class="lang-btn px-3 py-2 text-sm flex items-center gap-2.5 border-t border-border hover:bg-accent transition-colors" data-lang="es" title="Español">
+		<img src="https://flagcdn.com/w40/es.png" alt="ES" class="w-6 h-auto rounded-sm shadow-xs" />
+	</button>
+	</div>
+    </div>
+    <ModeToggle client:load />
+  </div>
+
+  <div id="edit-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-background border border-border w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+      <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold" id="modal-title">Modifier</h3><button id="close-modal"><X className="w-5 h-5" /></button></div>
+      <div class="space-y-4">
+        <input type="file" id="edit-pp-input" accept="image/*" class="hidden" />
+        <div class="flex gap-4 items-center p-3 bg-accent/20 rounded-xl cursor-pointer" onclick="document.getElementById('edit-pp-input').click()">
+            <img id="modal-pp-preview" src="" class="w-14 h-14 rounded-full object-cover border-2 border-[#1d9bf0]" />
+            <p class="text-[10px] uppercase font-bold">Photo de profil</p>
+        </div>
+        <div><label class="text-xs font-bold uppercase ml-1">Nom</label><input type="text" id="edit-name-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+        <div><label class="text-xs font-bold uppercase ml-1">Bio</label><textarea id="edit-bio-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none resize-none" rows="2"></textarea></div>
+        <div><label class="text-xs font-bold uppercase ml-1">École</label><input type="text" id="edit-school-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+        <div><label class="text-xs font-bold uppercase ml-1">Localisation</label><input type="text" id="edit-location-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+        <div><label class="text-xs font-bold uppercase ml-1">GitHub</label><input type="url" id="edit-github-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+        <div><label class="text-xs font-bold uppercase ml-1">LinkedIn</label><input type="url" id="edit-linkedin-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+      </div>
+      <Button id="save-profile" className="w-full mt-6 rounded-full bg-foreground text-background font-bold h-11">Enregistrer</Button>
+    </div>
   </div>
 </div>
 
-<style is:global>
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+<script>
+  const i18n = {
+    fr: { edit: "Modifier", post: "Poster", placeholder: "Quoi de neuf ?", tPosts: "Posts", tExp: "Expérience", tSkills: "Skills", modal: "Modifier le profil", portfolio: "Portfolio Pro", translate: "Traduire le tweet", original: "Original :" },
+    en: { edit: "Edit", post: "Post", placeholder: "What's happening?", tPosts: "Posts", tExp: "Experience", tSkills: "Skills", modal: "Edit Profile", portfolio: "Pro Portfolio", translate: "Translate post", original: "Original:" },
+    es: { edit: "Editar", post: "Postear", placeholder: "¿Qué pasa?", tPosts: "Posts", tExp: "Experiencia", tSkills: "Habilidades", modal: "Editar perfil", portfolio: "Portafolio Pro", translate: "Traducir tweet", original: "Original:" }
+  };
+
+  const STORAGE_POSTS = 'baptiste_posts_v4';
+  const STORAGE_PROFILE = 'baptiste_profile_v4';
+  const STORAGE_LANG = 'baptiste_lang';
+  const isDev = document.getElementById('main-container')?.getAttribute('data-is-dev') === 'true';
+
+  const uiAvatar = document.getElementById('ui-avatar');
+  const uiName = document.getElementById('ui-name');
+  const uiHeaderName = document.getElementById('ui-header-name');
+  const uiBio = document.getElementById('ui-bio');
+  const uiLocation = document.getElementById('ui-location');
+  const uiSchool = document.getElementById('ui-school');
+  const uiGithubLink = document.getElementById('ui-github-link');
+  const uiLinkedinLink = document.getElementById('ui-linkedin-link');
+  const container = document.getElementById('posts-container');
+  const langMenu = document.getElementById('lang-menu');
+
+  // --- LOGIQUE TRADUCTION AVEC CHUNKING ---
+  const translatePost = async (btn) => {
+    const text = btn.getAttribute('data-text') || "";
+    const targetLang = localStorage.getItem(STORAGE_LANG) || 'fr';
+    const article = btn.closest('article');
+    const mainTextZone = article.querySelector('.post-main-text');
+    const originalZone = article.querySelector('.original-content');
+    
+    btn.innerText = "...";
+    const maxLength = 450;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += maxLength) chunks.push(text.substring(i, i + maxLength));
+
+    try {
+      const promises = chunks.map(chunk => 
+        fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=autodetect|${targetLang}`).then(res => res.json())
+      );
+      const results = await Promise.all(promises);
+      const fullTranslation = results.map(d => d.responseData ? d.responseData.translatedText : "").join("");
+
+      if (fullTranslation.trim()) {
+        mainTextZone.innerText = fullTranslation;
+        originalZone.classList.remove('hidden');
+        btn.classList.add('hidden');
+      }
+    } catch (e) {
+      window.open(`https://translate.google.com/?sl=auto&tl=${targetLang}&text=${encodeURIComponent(text)}`, '_blank');
+      btn.innerText = "Translate";
+    }
+  };
+
+// --- LOGIQUE RENDU ---
+  const render = () => {
+    if (!container) return;
+
+    // Configuration : Langue par défaut de tes écrits
+    const TWEET_LANG = 'en'; 
+
+    const posts = JSON.parse(localStorage.getItem(STORAGE_POSTS) || '[]');
+    const profile = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || '{}');
+    const lang = localStorage.getItem(STORAGE_LANG) || 'fr';
+    const t = i18n[lang];
+
+    // Vérification : Doit-on proposer la traduction ?
+    const showTranslateBtn = lang !== TWEET_LANG;
+
+    container.innerHTML = '';
+    
+    posts.slice().reverse().forEach((p, i) => {
+      const idx = posts.length - 1 - i;
+      
+      container.insertAdjacentHTML('beforeend', `
+        <article class="px-4 py-3 border-b border-border group transition-colors hover:bg-accent/5">
+          <div class="flex gap-3">
+            <img src="${profile.avatar || uiAvatar.src}" class="w-10 h-10 rounded-full flex-shrink-0 object-cover" />
+            <div class="w-full">
+              <div class="flex justify-between items-center font-bold text-[15px]">
+                <div>
+                  ${profile.name || uiName.innerText} 
+                  <svg class="inline w-3.5 h-3.5 fill-[#1d9bf0] text-background animate-pulse" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span class="font-normal text-muted-foreground ml-1">@baptistehbt · ${p.date}</span>
+                </div>
+                ${isDev ? `
+                  <button class="del-btn p-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" data-idx="${idx}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                ` : ''}
+              </div>
+
+              <div class="mt-1 text-[15px] whitespace-pre-wrap post-main-text">${p.text}</div>
+
+              ${showTranslateBtn ? `
+                <button class="translate-btn text-[#1d9bf0] text-[13px] hover:underline mt-1 block" data-text="${p.text}">
+                  ${t.translate}
+                </button>
+              ` : ''}
+
+              <div class="original-content mt-2 pt-2 border-t border-border text-[13px] text-muted-foreground hidden">
+                <span class="font-bold block">${t.original}</span>
+                <span class="whitespace-pre-wrap">${p.text}</span>
+              </div>
+
+              ${p.img ? `<img src="${p.img}" class="mt-3 rounded-2xl border w-full shadow-sm" />` : ''}
+
+              <div class="mt-3 flex justify-between max-w-md text-muted-foreground/60">
+                <div class="p-2 hover:bg-[#1d9bf0]/10 rounded-full cursor-pointer transition-colors"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5 fill-current"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.243c4.421 0 8.005 3.58 8.005 8 0 4.41-3.584 8-8.005 8h-.617l-5.623 4.74c-.408.35-.997.06-1.098-.46L6.072 18H1.751c-4.42 0-8.005-3.59-8.005-8z"></path></svg></div>
+                <div class="p-2 hover:bg-[#00ba7c]/10 rounded-full cursor-pointer transition-colors"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5 fill-current"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14z"></path></svg></div>
+                <div class="p-2 hover:bg-[#f91880]/10 rounded-full cursor-pointer transition-all active:scale-125"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5 fill-current"><path d="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></svg></div>
+              </div>
+            </div>
+          </div>
+        </article>
+      `);
+    });
+  };
+
+  // --- LOGIQUE LANGUE ET THEME SYSTEME ---
+  const updateLang = (lang) => {
+    localStorage.setItem(STORAGE_LANG, lang);
+    const t = i18n[lang];
+    if(document.getElementById('txt-edit')) document.getElementById('txt-edit').innerText = t.edit;
+    if(document.getElementById('send-post')) document.getElementById('send-post').innerText = t.post;
+    if(document.getElementById('post-input')) document.getElementById('post-input').placeholder = t.placeholder;
+    document.getElementById('tab-posts').innerText = t.tPosts;
+    document.getElementById('tab-exp').innerText = t.tExp;
+    document.getElementById('tab-skills').innerText = t.tSkills;
+    document.getElementById('modal-title').innerText = t.modal;
+    document.getElementById('ui-portfolio-text').innerText = t.portfolio;
+    langMenu.classList.add('hidden');
+    render();
+  };
+
+  const applyTheme = () => {
+    const savedTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark', (savedTheme || systemTheme) === 'dark');
+  };
+
+  // --- INITIALISATION ---
+  const loadProfile = () => {
+    const d = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || '{}');
+    if (d.name) { uiName.innerText = d.name; uiHeaderName.innerText = d.name; }
+    if (d.bio) uiBio.innerText = d.bio;
+    if (d.location) uiLocation.innerText = d.location;
+    if (d.school) uiSchool.innerText = d.school;
+    if (d.avatar) { uiAvatar.src = d.avatar; if(document.getElementById('post-box-avatar')) document.getElementById('post-box-avatar').src = d.avatar; }
+    if (d.github) uiGithubLink.href = d.github;
+    if (d.linkedin) uiLinkedinLink.href = d.linkedin;
+  };
+
+  // Events
+  document.getElementById('lang-toggle-btn').onclick = () => langMenu.classList.toggle('hidden');
+  document.querySelectorAll('.lang-btn').forEach(b => b.onclick = () => updateLang(b.dataset.lang));
+  window.matchMedia('(prefers-color-scheme: dark)').onchange = () => !localStorage.getItem('theme') && applyTheme();
+  
+  container.onclick = (e) => {
+    const btnDel = e.target.closest('.del-btn');
+    const btnTrans = e.target.closest('.translate-btn');
+    if(btnDel) {
+      const p = JSON.parse(localStorage.getItem(STORAGE_POSTS));
+      p.splice(btnDel.dataset.idx, 1);
+      localStorage.setItem(STORAGE_POSTS, JSON.stringify(p));
+      render();
+    }
+    if(btnTrans) translatePost(btnTrans);
+  };
+
+  if(isDev) {
+    const saveBtn = document.getElementById('save-profile');
+    const openBtn = document.getElementById('open-edit-modal');
+    const modal = document.getElementById('edit-modal');
+    const inPP = document.getElementById('edit-pp-input');
+
+    openBtn.onclick = () => {
+      const d = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || '{}');
+      document.getElementById('edit-name-input').value = uiName.innerText;
+      document.getElementById('edit-bio-input').value = uiBio.innerText;
+      document.getElementById('edit-school-input').value = d.school || uiSchool.innerText;
+      document.getElementById('edit-location-input').value = d.location || uiLocation.innerText;
+      document.getElementById('modal-pp-preview').src = uiAvatar.src;
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+    };
+
+    document.getElementById('close-modal').onclick = () => modal.classList.replace('flex', 'hidden');
+
+    inPP.onchange = (e) => {
+      const r = new FileReader();
+      r.onload = (ev) => document.getElementById('modal-pp-preview').src = ev.target.result;
+      r.readAsDataURL(e.target.files[0]);
+    };
+
+    saveBtn.onclick = () => {
+      const data = {
+        name: document.getElementById('edit-name-input').value,
+        bio: document.getElementById('edit-bio-input').value,
+        school: document.getElementById('edit-school-input').value,
+        location: document.getElementById('edit-location-input').value,
+        github: document.getElementById('edit-github-input').value,
+        linkedin: document.getElementById('edit-linkedin-input').value,
+        avatar: document.getElementById('modal-pp-preview').src
+      };
+      localStorage.setItem(STORAGE_PROFILE, JSON.stringify(data));
+      loadProfile(); modal.classList.replace('flex', 'hidden');
+    };
+
+    document.getElementById('send-post').onclick = () => {
+        const input = document.getElementById('post-input');
+        if (!input.value.trim()) return;
+        const posts = JSON.parse(localStorage.getItem(STORAGE_POSTS) || '[]');
+        posts.push({ text: input.value, date: new Date().toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) });
+        localStorage.setItem(STORAGE_POSTS, JSON.stringify(posts));
+        input.value = ''; render();
+    };
   }
+
+  loadProfile();
+  applyTheme();
+  updateLang(localStorage.getItem(STORAGE_LANG) || 'fr');
+</script>
+
+<style is:global>
+  .animate-in { animation: zoomIn 0.15s ease-out; }
+  @keyframes zoomIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+  nav a .absolute { box-shadow: 0 0 10px rgba(29, 155, 240, 0.6); }
 </style>
