@@ -1,0 +1,24 @@
+---
+import { ModeToggle } from "@/components/ModeToggle";
+import { Languages } from 'lucide-react';
+---
+
+<div class="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+  <div class="relative">
+    <button id="lang-toggle-btn" class="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent h-9 w-9">
+      <Languages className="h-[1.2rem] w-[1.2rem]" />
+    </button>
+    <div id="lang-menu" class="absolute bottom-full right-0 mb-2 w-24 bg-background border border-border rounded-md shadow-lg hidden flex-col overflow-hidden animate-in">
+      <button class="lang-btn px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-accent transition-colors" data-lang="fr" title="Français">
+        <img src="https://flagcdn.com/w40/fr.png" alt="FR" class="w-6 h-auto rounded-sm shadow-xs" />
+      </button>
+      <button class="lang-btn px-3 py-2 text-sm flex items-center gap-2.5 border-t border-border hover:bg-accent transition-colors" data-lang="en" title="English">
+        <img src="https://flagcdn.com/w40/gb.png" alt="EN" class="w-6 h-auto rounded-sm shadow-xs" />
+      </button>
+      <button class="lang-btn px-3 py-2 text-sm flex items-center gap-2.5 border-t border-border hover:bg-accent transition-colors" data-lang="es" title="Español">
+        <img src="https://flagcdn.com/w40/es.png" alt="ES" class="w-6 h-auto rounded-sm shadow-xs" />
+      </button>
+    </div>
+  </div>
+  <ModeToggle client:load />
+</div>

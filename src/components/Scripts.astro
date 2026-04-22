@@ -1,0 +1,406 @@
+---
+---
+
+<script>
+  // --- CONFIGURATION & DATA ---
+  const i18n = {
+    fr: { edit: "Modifier", post: "Poster", placeholder: "Quoi de neuf ?", tPosts: "À propos de moi", tExp: "Expérience", tSkills: "Compétences", modal: "Modifier le profil", portfolio: "Portfolio Pro", translate: "Traduire le tweet", original: "Original :" },
+    en: { edit: "Edit", post: "Post", placeholder: "What's happening?", tPosts: "About me", tExp: "Experience", tSkills: "Skills", modal: "Edit Profile", portfolio: "Pro Portfolio", translate: "Translate post", original: "Original:" },
+    es: { edit: "Editar", post: "Postear", placeholder: "¿Qué pasa?", tPosts: "Acerca de", tExp: "Experiencia", tSkills: "Habilidades", modal: "Editar perfil", portfolio: "Portafolio Pro", translate: "Traducir tweet", original: "Original:" }
+  };
+
+  const STORAGE_POSTS = 'baptiste_posts_v4';
+  const STORAGE_EXPERIENCE = 'baptiste_experience_v1';
+  const STORAGE_SKILLS = 'baptiste_skills_v1';
+  const STORAGE_PROJECTS = 'baptiste_projects_v1';
+  const STORAGE_PROFILE = 'baptiste_profile_v4';
+  const STORAGE_LANG = 'baptiste_lang';
+  
+  const mainContainer = document.getElementById('main-container');
+  const isDev = mainContainer?.getAttribute('data-is-dev') === 'true';
+
+  const uiAvatar = document.getElementById('ui-avatar');
+  const uiName = document.getElementById('ui-name');
+  const uiHeaderName = document.getElementById('ui-header-name');
+  const uiBio = document.getElementById('ui-bio');
+  const uiLocation = document.getElementById('ui-location');
+  const uiSchool = document.getElementById('ui-school');
+  const uiGithubLink = document.getElementById('ui-github-link');
+  const uiLinkedinLink = document.getElementById('ui-linkedin-link');
+  const postsContainer = document.getElementById('about-container');
+  const expContainer = document.getElementById('experience-container');
+  const skillsContainer = document.getElementById('skills-container');
+  const projectsContainer = document.getElementById('projects-container');
+  const langMenu = document.getElementById('lang-menu');
+
+  // --- LOGIQUE INDICATEUR BLEU (NAV) ---
+  const indicator = document.getElementById('nav-indicator');
+  const navLinks = document.querySelectorAll('.nav-link');
+  
+  const updateIndicator = (target) => {
+    if (!target || !indicator) return;
+    const linkRect = target.getBoundingClientRect();
+    const navRect = target.parentElement.getBoundingClientRect();
+    
+    // Calcule la position horizontale relative au parent nav
+    // Le décalage (56/2) correspond à la moitié de la largeur w-14 (56px) pour centrer
+    const centerPosition = (linkRect.left - navRect.left) + (linkRect.width / 2) - (56 / 2);
+    
+    indicator.style.transform = `translateX(${centerPosition}px)`;
+    
+    // Switch de classes pour le texte
+    navLinks.forEach(link => {
+      link.classList.remove('text-foreground');
+      link.classList.add('text-muted-foreground');
+    });
+    target.classList.add('text-foreground');
+    target.classList.remove('text-muted-foreground');
+  };
+
+  // --- LOGIQUE TRADUCTION AVEC CHUNKING ---
+  const translatePost = async (btn) => {
+    const text = btn.getAttribute('data-text') || "";
+    const targetLang = localStorage.getItem(STORAGE_LANG) || 'fr';
+    const article = btn.closest('article');
+    const mainTextZone = article.querySelector('.post-main-text');
+    const originalZone = article.querySelector('.original-content');
+    
+    btn.innerText = "...";
+    const maxLength = 450;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += maxLength) chunks.push(text.substring(i, i + maxLength));
+
+    try {
+      const promises = chunks.map(chunk => 
+        fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=autodetect|${targetLang}`).then(res => res.json())
+      );
+      const results = await Promise.all(promises);
+      const fullTranslation = results.map(d => d.responseData ? d.responseData.translatedText : "").join("");
+
+      if (fullTranslation.trim()) {
+        mainTextZone.innerText = fullTranslation;
+        originalZone.classList.remove('hidden');
+        btn.classList.add('hidden');
+      }
+    } catch (e) {
+      window.open(`https://translate.google.com/?sl=auto&tl=${targetLang}&text=${encodeURIComponent(text)}`, '_blank');
+      btn.innerText = "Translate";
+    }
+  };
+
+  // --- LOGIQUE RENDU POUR LES POSTS (ABOUT) ---
+  const renderPosts = () => {
+    if (!postsContainer) return;
+    const TWEET_LANG = 'en'; 
+    const posts = JSON.parse(localStorage.getItem(STORAGE_POSTS) || '[]');
+    const profile = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || '{}');
+    const lang = localStorage.getItem(STORAGE_LANG) || 'fr';
+    const t = i18n[lang];
+    const showTranslateBtn = lang !== TWEET_LANG;
+
+    postsContainer.innerHTML = '';
+    posts.slice().reverse().forEach((p, i) => {
+      const idx = posts.length - 1 - i;
+      postsContainer.insertAdjacentHTML('beforeend', `
+        <article id="post-${idx}" class="px-4 py-3 border-b border-border group transition-colors hover:bg-accent/5">
+          <div class="flex gap-3">
+            <img src="${profile.avatar || uiAvatar.src}" class="w-10 h-10 rounded-full flex-shrink-0 object-cover" />
+            <div class="w-full">
+              <div class="flex justify-between items-center font-bold text-[15px]">
+                <div>
+                  ${profile.name || uiName.innerText} 
+                  <svg class="inline w-3.5 h-3.5 fill-[#1d9bf0] text-background animate-pulse" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span class="font-normal text-muted-foreground ml-1">@baptistehbt · ${p.date}</span>
+                </div>
+                ${isDev ? `<button class="del-btn p-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" data-idx="${idx}" data-type="posts"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>` : ''}
+              </div>
+              <div class="mt-1 text-[15px] whitespace-pre-wrap post-main-text">${p.text}</div>
+              ${showTranslateBtn ? `<button class="translate-btn text-[#1d9bf0] text-[13px] hover:underline mt-1 block" data-text="${p.text}">${t.translate}</button>` : ''}
+              <div class="original-content mt-2 pt-2 border-t border-border text-[13px] text-muted-foreground hidden">
+                <span class="font-bold block">${t.original}</span><span class="whitespace-pre-wrap">${p.text}</span>
+              </div>
+              ${p.img ? `<img src="${p.img}" class="mt-3 rounded-2xl border w-full shadow-sm" />` : ''}
+              <div class="mt-3 flex justify-between max-w-md text-muted-foreground/60">
+                <div class="p-2 hover:bg-[#1d9bf0]/10 rounded-full transition-colors cursor-pointer"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5 fill-current"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.243c4.421 0 8.005 3.58 8.005 8 0 4.41-3.584 8-8.005 8h-.617l-5.623 4.74c-.408.35-.997.06-1.098-.46L6.072 18H1.751c-4.42 0-8.005-3.59-8.005-8z"></path></svg></div>
+                <div class="p-2 hover:bg-[#00ba7c]/10 rounded-full transition-colors cursor-pointer"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5 fill-current"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14z"></path></svg></div>
+                <div class="p-2 hover:bg-[#f91880]/10 rounded-full transition-all active:scale-125 cursor-pointer"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5 fill-current"><path d="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></svg></div>
+              </div>
+            </div>
+          </div>
+        </article>
+      `);
+    });
+  };
+
+  // --- LOGIQUE RENDU POUR EXPERIENCE / SKILLS / PROJECTS ---
+// --- LOGIQUE RENDU POUR EXPERIENCE ---
+  const renderExperience = () => {
+    if (!expContainer) return;
+    const items = JSON.parse(localStorage.getItem(STORAGE_EXPERIENCE) || '[]');
+    
+    // Données par défaut si vide
+    const list = items.length ? items : [
+      { 
+        job: 'Développeur Frontend', 
+        company: 'Startup X', 
+        period: 'Jan. 2023 - Présent', 
+        text: 'Développement d\'interfaces haute performance avec Astro et Tailwind CSS.' 
+      },
+      { 
+        job: 'Stagiaire Fullstack', 
+        company: 'Agence Digitale Y', 
+        period: 'Juin 2022 - Déc. 2022', 
+        text: 'Maintenance de parcs WordPress et création d\'API Node.js.' 
+      }
+    ];
+
+    expContainer.innerHTML = '';
+    list.forEach((it, i) => {
+      expContainer.insertAdjacentHTML('beforeend', `
+        <article class="px-4 py-3 border-b border-border group transition-colors hover:bg-accent/5">
+          <div class="flex gap-3">
+            <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 border border-border">
+              <span class="text-xs font-bold text-[#1d9bf0]">${it.company.substring(0, 2).toUpperCase()}</span>
+            </div>
+            
+            <div class="w-full">
+              <div class="flex justify-between items-start">
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-1 font-bold text-[15px]">
+                    ${it.job}
+                    <svg class="w-3.5 h-3.5 fill-[#1d9bf0]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </div>
+                  <div class="text-muted-foreground text-[14px]">@${it.company.replace(/\s+/g, '').toLowerCase()} · ${it.period}</div>
+                </div>
+                
+                ${isDev ? `
+                  <button class="del-btn p-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" data-idx="${i}" data-type="experience">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                ` : ''}
+              </div>
+              
+              <div class="mt-2 text-[15px] leading-normal text-foreground/90 whitespace-pre-wrap">${it.text}</div>
+            </div>
+          </div>
+        </article>
+      `);
+    });
+  };
+
+  const renderSkills = () => {
+    if (!skillsContainer) return;
+    const items = JSON.parse(localStorage.getItem(STORAGE_SKILLS) || '[]');
+    const list = items.length ? items : ['JavaScript', 'TypeScript', 'Astro', 'React', 'Design'];
+    skillsContainer.innerHTML = '';
+    skillsContainer.insertAdjacentHTML('beforeend', `
+      <div class="px-4 py-3">
+        <div class="flex flex-wrap gap-2">
+          ${list.map(s => `<span class="px-3 py-1 rounded-full bg-accent/10 text-sm">${s}</span>`).join('')}
+        </div>
+      </div>
+    `);
+  };
+
+  const renderProjects = () => {
+    if (!projectsContainer) return;
+    const items = JSON.parse(localStorage.getItem(STORAGE_PROJECTS) || '[]');
+    const list = items.length ? items : [
+      { name: 'Portfolio', desc: 'Site perso construit avec Astro.' },
+      { name: 'App Todo', desc: 'Application de prise de notes.' }
+    ];
+    projectsContainer.innerHTML = '';
+    list.forEach(p => {
+      projectsContainer.insertAdjacentHTML('beforeend', `
+        <article class="px-4 py-3 border-b border-border">
+          <div class="font-bold">${p.name}</div>
+          <div class="mt-2 text-[15px] text-muted-foreground">${p.desc}</div>
+        </article>
+      `);
+    });
+  };
+
+  const showSection = (section) => {
+    // hide all
+    if (postsContainer) postsContainer.parentElement.style.display = 'none';
+    if (expContainer) expContainer.parentElement.style.display = 'none';
+    if (skillsContainer) skillsContainer.parentElement.style.display = 'none';
+    if (projectsContainer) projectsContainer.parentElement.style.display = 'none';
+
+    switch (section) {
+      case 'about':
+        if (postsContainer) { postsContainer.parentElement.style.display = ''; renderPosts(); }
+        break;
+      case 'experience':
+        if (expContainer) { expContainer.parentElement.style.display = ''; renderExperience(); }
+        break;
+      case 'skills':
+        if (skillsContainer) { skillsContainer.parentElement.style.display = ''; renderSkills(); }
+        break;
+      case 'projects':
+        if (projectsContainer) { projectsContainer.parentElement.style.display = ''; renderProjects(); }
+        break;
+    }
+  };
+
+  // --- LOGIQUE LANGUE ET THEME ---
+  const updateLang = (lang) => {
+    localStorage.setItem(STORAGE_LANG, lang);
+    const t = i18n[lang];
+    if(document.getElementById('txt-edit')) document.getElementById('txt-edit').innerText = t.edit;
+    if(document.getElementById('send-post')) document.getElementById('send-post').innerText = t.post;
+    if(document.getElementById('post-input')) document.getElementById('post-input').placeholder = t.placeholder;
+    document.getElementById('tab-posts').innerText = t.tPosts;
+    document.getElementById('tab-exp').innerText = t.tExp;
+    document.getElementById('tab-skills').innerText = t.tSkills;
+    document.getElementById('tab-projects').innerText = i18n[lang].tPosts === "About me" ? "Projects" : (lang === 'fr' ? "Projets" : "Proyectos");
+    document.getElementById('modal-title').innerText = t.modal;
+    document.getElementById('ui-portfolio-text').innerText = t.portfolio;
+    langMenu.classList.add('hidden');
+    render();
+    
+    // Recalibre l'indicateur après le changement de langue (car la largeur du texte change)
+    const activeLink = document.querySelector('.nav-link.text-foreground');
+    if (activeLink) setTimeout(() => updateIndicator(activeLink), 50);
+  };
+
+  const applyTheme = () => {
+    const savedTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark', (savedTheme || systemTheme) === 'dark');
+  };
+
+  const loadProfile = () => {
+    const d = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || '{}');
+    if (d.name) { uiName.innerText = d.name; uiHeaderName.innerText = d.name; }
+    if (d.bio) uiBio.innerText = d.bio;
+    if (d.location) uiLocation.innerText = d.location;
+    if (d.school) uiSchool.innerText = d.school;
+    if (d.avatar) { uiAvatar.src = d.avatar; if(document.getElementById('post-box-avatar')) document.getElementById('post-box-avatar').src = d.avatar; }
+    if (d.github) uiGithubLink.href = d.github;
+    if (d.linkedin) uiLinkedinLink.href = d.linkedin;
+  };
+
+  // --- INTERSECTION OBSERVER (DETECTION SCROLL) ---
+  const observerOptions = {
+    root: null,
+    rootMargin: '-20% 0px -70% 0px',
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (activeLink) updateIndicator(activeLink);
+      }
+    });
+  }, observerOptions);
+
+  // --- EVENTS ---
+  document.getElementById('lang-toggle-btn').onclick = () => langMenu.classList.toggle('hidden');
+  document.querySelectorAll('.lang-btn').forEach(b => b.onclick = () => updateLang(b.dataset.lang));
+  window.matchMedia('(prefers-color-scheme: dark)').onchange = () => !localStorage.getItem('theme') && applyTheme();
+  
+  navLinks.forEach(link => {
+    link.onclick = (e) => {
+      const section = link.dataset.section || link.getAttribute('href')?.replace('#','');
+      updateIndicator(link);
+      if (section) showSection(section);
+    };
+  });
+
+  // Events for posts (about)
+  if (postsContainer) {
+    postsContainer.onclick = (e) => {
+      const btnDel = e.target.closest('.del-btn');
+      const btnTrans = e.target.closest('.translate-btn');
+      if(btnDel) {
+        const p = JSON.parse(localStorage.getItem(STORAGE_POSTS) || '[]');
+        p.splice(btnDel.dataset.idx, 1);
+        localStorage.setItem(STORAGE_POSTS, JSON.stringify(p));
+        renderPosts();
+      }
+      if(btnTrans) translatePost(btnTrans);
+    };
+  }
+
+  // simple events for experience/projects editing in dev mode
+  if (expContainer) {
+    expContainer.onclick = (e) => {
+      const btnDel = e.target.closest('.del-btn');
+      if (btnDel && isDev) {
+        const arr = JSON.parse(localStorage.getItem(STORAGE_EXPERIENCE) || '[]');
+        arr.splice(btnDel.dataset.idx, 1);
+        localStorage.setItem(STORAGE_EXPERIENCE, JSON.stringify(arr));
+        renderExperience();
+      }
+    };
+  }
+
+  if(isDev) {
+    const saveBtn = document.getElementById('save-profile');
+    const openBtn = document.getElementById('open-edit-modal');
+    const modal = document.getElementById('edit-modal');
+    const inPP = document.getElementById('edit-pp-input');
+
+    openBtn.onclick = () => {
+      const d = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || '{}');
+      document.getElementById('edit-name-input').value = uiName.innerText;
+      document.getElementById('edit-bio-input').value = uiBio.innerText;
+      document.getElementById('edit-school-input').value = d.school || uiSchool.innerText;
+      document.getElementById('edit-location-input').value = d.location || uiLocation.innerText;
+      document.getElementById('modal-pp-preview').src = uiAvatar.src;
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+    };
+
+    document.getElementById('close-modal').onclick = () => modal.classList.replace('flex', 'hidden');
+
+    inPP.onchange = (e) => {
+      const r = new FileReader();
+      r.onload = (ev) => document.getElementById('modal-pp-preview').src = ev.target.result;
+      r.readAsDataURL(e.target.files[0]);
+    };
+
+    saveBtn.onclick = () => {
+      const data = {
+        name: document.getElementById('edit-name-input').value,
+        bio: document.getElementById('edit-bio-input').value,
+        school: document.getElementById('edit-school-input').value,
+        location: document.getElementById('edit-location-input').value,
+        github: document.getElementById('edit-github-input').value,
+        linkedin: document.getElementById('edit-linkedin-input').value,
+        avatar: document.getElementById('modal-pp-preview').src
+      };
+      localStorage.setItem(STORAGE_PROFILE, JSON.stringify(data));
+      loadProfile(); modal.classList.replace('flex', 'hidden');
+    };
+
+    document.getElementById('send-post').onclick = () => {
+        const input = document.getElementById('post-input');
+        if (!input.value.trim()) return;
+        const posts = JSON.parse(localStorage.getItem(STORAGE_POSTS) || '[]');
+        posts.push({ text: input.value, date: new Date().toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) });
+        localStorage.setItem(STORAGE_POSTS, JSON.stringify(posts));
+        input.value = ''; render();
+        
+    };
+  }
+
+  // --- INITIALISATION FINALE ---
+  loadProfile();
+  applyTheme();
+  updateLang(localStorage.getItem(STORAGE_LANG) || 'fr');
+
+  // Observe les sections HTML pour le scroll (ex: <section id="about">)
+  document.querySelectorAll('section[id]').forEach(section => observer.observe(section));
+</script>
+
+<style is:global>
+  .animate-in { animation: zoomIn 0.15s ease-out; }
+  @keyframes zoomIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+  nav a .absolute { box-shadow: 0 0 10px rgba(29, 155, 240, 0.6); }
+</style>
