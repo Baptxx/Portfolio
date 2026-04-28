@@ -1,0 +1,24 @@
+---
+import { Button } from "@/components/ui/button";
+import { X } from 'lucide-react';
+---
+
+<div id="edit-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-background border border-border w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+    <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold" id="modal-title">Modifier</h3><button id="close-modal"><X className="w-5 h-5" /></button></div>
+    <div class="space-y-4">
+      <input type="file" id="edit-pp-input" accept="image/*" class="hidden" />
+      <div class="flex gap-4 items-center p-3 bg-accent/20 rounded-xl cursor-pointer" onclick="document.getElementById('edit-pp-input').click()">
+          <img id="modal-pp-preview" src="" class="w-14 h-14 rounded-full object-cover border-2 border-[#1d9bf0]" />
+          <p class="text-[10px] uppercase font-bold">Photo de profil</p>
+      </div>
+      <div><label class="text-xs font-bold uppercase ml-1">Nom</label><input type="text" id="edit-name-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+      <div><label class="text-xs font-bold uppercase ml-1">Bio</label><textarea id="edit-bio-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none resize-none" rows="2"></textarea></div>
+      <div><label class="text-xs font-bold uppercase ml-1">École</label><input type="text" id="edit-school-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+      <div><label class="text-xs font-bold uppercase ml-1">Localisation</label><input type="text" id="edit-location-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+      <div><label class="text-xs font-bold uppercase ml-1">GitHub</label><input type="url" id="edit-github-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+      <div><label class="text-xs font-bold uppercase ml-1">LinkedIn</label><input type="url" id="edit-linkedin-input" class="w-full mt-1 bg-accent/20 rounded-xl p-3 outline-none" /></div>
+    </div>
+    <Button id="save-profile" className="w-full mt-6 rounded-full bg-foreground text-background font-bold h-11">Enregistrer</Button>
+  </div>
+</div>

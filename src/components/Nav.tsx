@@ -12,35 +12,35 @@ export default function Nav() {
       <NavigationMenuList>
         <NavigationMenuItem>
         <NavigationMenuLink 
-            href="#about" // L'ancre commence par #
+            href="#about"
             className={navigationMenuTriggerStyle()}
         >
             About
         </NavigationMenuLink>
         
         <NavigationMenuLink 
-            href="#experience" // L'ancre commence par #
+            href="#experience"
             className={navigationMenuTriggerStyle()}
         >
             Experience
         </NavigationMenuLink>
 
                 <NavigationMenuLink 
-            href="#skills" // L'ancre commence par #
+            href="#skills"
             className={navigationMenuTriggerStyle()}
         >
             Skills
         </NavigationMenuLink>
 
                 <NavigationMenuLink 
-            href="#projects" // L'ancre commence par #
+            href="#projects"
             className={navigationMenuTriggerStyle()}
         >
             Projects
         </NavigationMenuLink>
 
                 <NavigationMenuLink 
-            href="#contact" // L'ancre commence par #
+            href="#contact"
             className={navigationMenuTriggerStyle()}
         >
             Contact
