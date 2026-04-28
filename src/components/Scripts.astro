@@ -395,6 +395,9 @@
   applyTheme();
   updateLang(localStorage.getItem(STORAGE_LANG) || 'fr');
 
+  // Affiche la section 'about' par défaut
+  showSection('about');
+
   // Observe les sections HTML pour le scroll (ex: <section id="about">)
   document.querySelectorAll('section[id]').forEach(section => observer.observe(section));
 </script>
